@@ -18,7 +18,9 @@ class ItemView(MethodView):
         if item:
             return self.schema.dump(item), 200
         else:
-            return 'Item not found', 404
+            return {
+                "message": "Item not found"
+            }, 400
 
     def put(self, id):
         item = self._get_item(id)
@@ -33,15 +35,19 @@ class ItemView(MethodView):
             item.save()
             return self.schema.dump(item), 200
         else:
-            return 'Item not found', 404
+            return {
+                "message": "Item not found"
+            }, 404
 
     def delete(self, id):
         item = self._get_item(id)
         if item:
             item.delete_instance()
-            return '', 200
+            return {}, 200
         else:
-            return 'Item not found', 404
+            return {
+                "message": "Item not found"
+            }, 400
 
 
 class GroupView(MethodView):
@@ -62,7 +68,9 @@ class GroupView(MethodView):
             item = self.model.create(**new_data)
             return self.schema.dump(item), 201
         except Exception as e:
-            return str(e), 400
+            return {
+                "message:": str(e)
+            }, 400
 
 
 def register_api(app, model, url, schema, schemas):
