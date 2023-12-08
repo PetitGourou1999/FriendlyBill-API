@@ -1,4 +1,5 @@
 from marshmallow import *
+
 from models.bill import Bill
 
 class BillSchema(Schema):

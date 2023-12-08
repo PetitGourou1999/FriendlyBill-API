@@ -1,4 +1,5 @@
 from peewee import *
+
 from models.user import User
 from models.bill import Bill
 

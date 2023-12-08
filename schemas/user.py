@@ -1,4 +1,5 @@
 from marshmallow import *
+
 from models.user import User
 
 class UserSchema(Schema):

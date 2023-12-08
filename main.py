@@ -12,9 +12,6 @@ from schemas.user import UserSchema
 from schemas.bill import BillSchema
 from schemas.bill_item import BillItemSchema
 
-from schemas import *
-
-
 def init_db(application):
     database = Database(application)
     database.database.bind([User])
