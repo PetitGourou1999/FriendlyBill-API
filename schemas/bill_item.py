@@ -6,7 +6,7 @@ from schemas.user import UserSchema
 from schemas.bill import BillSchema
 
 class BillItemSchema(Schema):
-    id = fields.Int()
+    id = fields.Int(dump_only=True)
     title = fields.Str()
     created_date = fields.Str()
     updated_date = fields.Str()

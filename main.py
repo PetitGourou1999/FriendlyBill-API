@@ -2,13 +2,14 @@ from flask import Flask
 from flask_peewee.db import Database
 
 from config import DebugConfig
-from generics.generics import register_api
+
+from blueprints import authentication
+from views.generics import register_api
 
 from models.user import User
 from models.bill import Bill
 from models.bill_item import BillItem
 
-from schemas.user import UserSchema
 from schemas.bill import BillSchema
 from schemas.bill_item import BillItemSchema
 
@@ -32,9 +33,9 @@ def create_app(config):
 
 
 def put_in_register(application):
-    register_api(application, User, "user", UserSchema(), UserSchema(many=True))
     register_api(application, Bill, "bill", BillSchema(), BillSchema(many=True))
     register_api(application, BillItem, "item", BillItemSchema(), BillItemSchema(many=True))
+    application.register_blueprint(authentication.bp)
 
 if __name__ == '__main__':
     app = create_app(DebugConfig())

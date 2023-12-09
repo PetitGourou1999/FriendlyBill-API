@@ -3,6 +3,8 @@ from datetime import datetime
 from flask import request
 from flask.views import MethodView
 
+from utils.decorators import token_required
+
 class ItemView(MethodView):
     init_every_request = False
 
@@ -13,42 +15,45 @@ class ItemView(MethodView):
     def _get_item(self, id):
         return self.model.get_or_none(self.model.id == id)
 
+    @token_required
     def get(self, id):
         item = self._get_item(id)
-        if item:
-            return self.schema.dump(item), 200
-        else:
+        if not item:
             return {
                 "message": "Item not found"
             }, 400
-
+        return self.schema.dump(item), 200
+            
+    @token_required
     def put(self, id):
         item = self._get_item(id)
-        if item:
-            new_data = request.json
-            for attr in new_data:
-                if hasattr(item, attr):
-                    if isinstance(getattr(item, attr), datetime):
-                        setattr(item, attr, datetime.fromisoformat(new_data[attr]))
-                    else:
-                        setattr(item, attr, new_data[attr])
-            item.save()
-            return self.schema.dump(item), 200
-        else:
+        if not item:
             return {
                 "message": "Item not found"
             }, 404
-
+        new_data = request.json
+        if not new_data:
+            return {
+                "message": "Please provide details",
+            }, 400
+        for attr in new_data:
+            if hasattr(item, attr):
+                if isinstance(getattr(item, attr), datetime):
+                    setattr(item, attr, datetime.fromisoformat(new_data[attr]))
+                else:
+                    setattr(item, attr, new_data[attr])
+        item.save()
+        return self.schema.dump(item), 200
+        
+    @token_required
     def delete(self, id):
         item = self._get_item(id)
-        if item:
-            item.delete_instance()
-            return {}, 200
-        else:
+        if not item:
             return {
                 "message": "Item not found"
             }, 400
-
+        item.delete_instance()
+        return {}, 200
 
 class GroupView(MethodView):
     init_every_request = False
@@ -58,13 +63,19 @@ class GroupView(MethodView):
         self.schema = schema
         self.schemas = schemas
 
+    @token_required
     def get(self):
         items = self.model.select()
         return self.schemas.dump(items), 200
 
+    @token_required
     def post(self):
+        new_data = request.json
+        if not new_data:
+            return {
+                "message": "Please provide details",
+            }, 400    
         try:
-            new_data = request.json
             item = self.model.create(**new_data)
             return self.schema.dump(item), 201
         except Exception as e:

@@ -3,7 +3,7 @@ from models.bill import Bill
 from models.bill_item import BillItem
 
 def _insert_user():
-    return User.create(firstname='John', surname='Doe', email='john.doe@gmail.com', created_date='2023-01-01 00:00:00.000000', updated_date='2023-01-01 00:00:00.000000')
+    return User.create(firstname='John', surname='Doe', email='john.doe@gmail.com', password=User.encrypt_password('SuperSecret'), created_date='2023-01-01 00:00:00.000000', updated_date='2023-01-01 00:00:00.000000')
 
 def _insert_bill():
     return Bill.create(title='Dummy', created_date='2023-01-01 00:00:00.000000', updated_date='2023-01-01 00:00:00.000000')
