@@ -8,6 +8,8 @@ class UserSchema(Schema):
     surname = fields.Str(required=True)
     email = fields.Email()
     password = fields.Str(required=True, load_only=True)
+    created_date = fields.DateTime()
+    updated_date = fields.DateTime()
     
     @post_load
     def make(self, data, **kwargs):
