@@ -45,7 +45,6 @@ def login():
                 current_app.config["SECRET_KEY"],
                 algorithm="HS256"
             )
-            print('login_OK3')
             return {
                 "user": UserSchema().dump(user),
                 "token": user_token

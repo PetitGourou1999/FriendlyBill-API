@@ -30,7 +30,7 @@ class ItemView(MethodView):
         if not item:
             return {
                 "message": "Item not found"
-            }, 404
+            }, 400
         new_data = request.json
         if not new_data:
             return {
