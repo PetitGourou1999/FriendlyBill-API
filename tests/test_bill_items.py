@@ -5,7 +5,7 @@ from app import create_app
 
 from tests import data
 
-from schemas.bill_item import BillItemSchema
+from schemas.schemas import BillItemSchema
 
 @pytest.fixture()
 def app():

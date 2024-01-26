@@ -5,7 +5,7 @@ from functools import wraps
 from flask import request, abort
 from flask import current_app
 
-from models.user import User
+from models.models import User
 
 def token_required(f):
     @wraps(f)

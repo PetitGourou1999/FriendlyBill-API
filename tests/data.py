@@ -1,6 +1,4 @@
-from models.user import User
-from models.bill import Bill
-from models.bill_item import BillItem
+from models.models import User, Bill, BillItem
 
 def _insert_user():
     return User.create(firstname='John', surname='Doe', email='john.doe@gmail.com', password=User.encrypt_password('SuperSecret'), created_date='2023-01-01 00:00:00.000000', updated_date='2023-01-01 00:00:00.000000')

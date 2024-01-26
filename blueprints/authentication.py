@@ -5,8 +5,8 @@ from flask import request
 from flask import current_app
 from flask import Blueprint
 
-from models.user import User
-from schemas.user import UserSchema
+from models.models import User
+from schemas.schemas import UserSchema
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 

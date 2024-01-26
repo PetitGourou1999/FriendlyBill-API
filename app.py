@@ -7,16 +7,10 @@ from config import DebugConfig
 from blueprints import authentication
 from views.generics import register_api
 
-from models.user import User
-from models.bill import Bill
-from models.bill_item import BillItem
+from models.models import User, Bill, BillItem
+from schemas.schemas import BillSchema, BillItemSchema
 
-from schemas.bill import BillSchema
-from schemas.bill_item import BillItemSchema
-
-from admin.users import UsersView
-from admin.bills import BillsView
-from admin.bill_items import BillItemsView
+from admin.views import UsersView, BillsView, BillItemsView
 
 def init_db(application):
     database = Database(application)
@@ -47,7 +41,6 @@ def create_app(config):
     init_admin(application)
     put_in_register(application)
     return application
-
 
 if __name__ == '__main__':
     app = create_app(DebugConfig())
