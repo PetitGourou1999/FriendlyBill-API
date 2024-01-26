@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import request
 from flask.views import MethodView
 
-from utils.decorators import token_required
+from api.decorators import token_required
 
 class ItemView(MethodView):
     init_every_request = False

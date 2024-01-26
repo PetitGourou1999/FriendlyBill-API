@@ -4,11 +4,11 @@ from flask_peewee.db import Database
 
 from config import DebugConfig
 
-from blueprints import authentication
-from views.generics import register_api
+from api import authentication
+from api.generics import register_api
 
-from models.models import User, Bill, BillItem
-from schemas.schemas import BillSchema, BillItemSchema
+from data.models import User, Bill, BillItem
+from data.schemas import BillSchema, BillItemSchema
 
 from admin.views import UsersView, BillsView, BillItemsView
 

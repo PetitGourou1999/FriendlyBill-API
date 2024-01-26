@@ -1,6 +1,6 @@
 from marshmallow import *
 
-from models.models import User, Bill, BillItem
+from data.models import User, Bill, BillItem
 
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
