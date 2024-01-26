@@ -1,7 +1,9 @@
 bcrypt
 flask
+flask_admin
 flask_peewee
 marshmallow
 peewee
 pytest
 pyjwt
+wtforms

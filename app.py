@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_admin import Admin
 from flask_peewee.db import Database
 
 from config import DebugConfig
@@ -23,19 +24,23 @@ def init_db(application):
     database.database.create_tables([BillItem])
     return database
 
-
-def create_app(config):
-    application = Flask(__name__)
-    application.config.from_object(config)
-    init_db(application)
-    put_in_register(application)
-    return application
-
+def init_admin(application):
+    application.config['FLASK_ADMIN_SWATCH'] = 'united'
+    admin = Admin(application, name='friendly_bill', template_mode='bootstrap3')
 
 def put_in_register(application):
     register_api(application, Bill, "bill", BillSchema(), BillSchema(many=True))
     register_api(application, BillItem, "item", BillItemSchema(), BillItemSchema(many=True))
     application.register_blueprint(authentication.bp)
+
+def create_app(config):
+    application = Flask(__name__)
+    application.config.from_object(config)
+    init_db(application)
+    init_admin(application)
+    put_in_register(application)
+    return application
+
 
 if __name__ == '__main__':
     app = create_app(DebugConfig())

@@ -1,7 +1,7 @@
 import pytest
 
 from config import TestingConfig
-from main import create_app
+from app import create_app
 
 from tests import data
 
