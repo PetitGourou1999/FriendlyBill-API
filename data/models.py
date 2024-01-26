@@ -3,14 +3,17 @@ import datetime
 
 from peewee import *
 
-class User(Model):
+class BaseModel(Model):
+    created_date = DateTimeField(default=datetime.datetime.now)
+    updated_date = DateTimeField(default=datetime.datetime.now)
+
+
+class User(BaseModel):
     id = AutoField()
     firstname = CharField()
     surname = CharField()
     email = CharField(unique=True)
     password = CharField()
-    created_date = DateTimeField(default=datetime.datetime.now)
-    updated_date = DateTimeField(default=datetime.datetime.now)
 
     @classmethod
     def get_by_email(self, email):
@@ -29,17 +32,13 @@ class User(Model):
         return user
 
 
-class Bill(Model):
+class Bill(BaseModel):
     id = AutoField()
     title = CharField()
-    created_date = DateTimeField(default=datetime.datetime.now)
-    updated_date = DateTimeField(default=datetime.datetime.now)
+    
 
-
-class BillItem(Model):
+class BillItem(BaseModel):
     id = AutoField()
     title = CharField()
-    created_date = DateTimeField(default=datetime.datetime.now)
-    updated_date = DateTimeField(default=datetime.datetime.now)
     user = ForeignKeyField(User, backref='items')
     bill = ForeignKeyField(Bill, backref='items')
