@@ -3,13 +3,9 @@
 ## How To Setup
 
 ```
-pip3 install peewee
-pip3 install bcrypt
-pip3 install marshmallow
-pip3 install flask
-pip3 install flask_peewee
-pip3 install pytest
-pip3 install pyjwt
+python3 -v venv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
 ```
 
 ## How to run tests

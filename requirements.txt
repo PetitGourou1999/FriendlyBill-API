@@ -1,0 +1,7 @@
+bcrypt
+flask
+flask_peewee
+marshmallow
+peewee
+pytest
+pyjwt
