@@ -14,6 +14,10 @@ from models.bill_item import BillItem
 from schemas.bill import BillSchema
 from schemas.bill_item import BillItemSchema
 
+from admin.users import UsersView
+from admin.bills import BillsView
+from admin.bill_items import BillItemsView
+
 def init_db(application):
     database = Database(application)
     database.database.bind([User])
@@ -27,6 +31,9 @@ def init_db(application):
 def init_admin(application):
     application.config['FLASK_ADMIN_SWATCH'] = 'united'
     admin = Admin(application, name='friendly_bill', template_mode='bootstrap3')
+    admin.add_view(UsersView(User))
+    admin.add_view(BillsView(Bill))
+    admin.add_view(BillItemsView(BillItem))
 
 def put_in_register(application):
     register_api(application, Bill, "bill", BillSchema(), BillSchema(many=True))
