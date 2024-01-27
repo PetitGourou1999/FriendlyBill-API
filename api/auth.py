@@ -1,7 +1,7 @@
 import jwt
 
 from flask import Blueprint
-from flask import make_response, current_app
+from flask import current_app
 from flask_apispec import use_kwargs, marshal_with, doc
 
 from shortcuts import check_password

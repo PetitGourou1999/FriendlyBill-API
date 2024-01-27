@@ -27,7 +27,6 @@ class BillResource(MethodResource):
     
     @token_required
     @use_kwargs(BillSchema, location='json')
-    @marshal_with(BillSchema, code=200)
     @marshal_with(ErrorSchema, code=400)
     @doc(description='Create bill', tags=['Bills'])
     def post(self, **kwargs):
@@ -35,11 +34,11 @@ class BillResource(MethodResource):
             error = {"message": "Please provide details"}
             return error, 400
         try:
-            bill = Bill.create(**kwargs)
+            Bill.create(**kwargs)
         except Exception as e:
             error = {"message": str(e)}
             return error, 500
-        return bill, 200
+        return {}, 201
     
     @token_required
     @use_kwargs({'id': fields.Int()}, location='query')
@@ -78,7 +77,6 @@ class BillItemResource(MethodResource):
     
     @token_required
     @use_kwargs(BillItemSchema, location='json')
-    @marshal_with(BillItemSchema, code=200)
     @marshal_with(ErrorSchema, code=400)
     @doc(description='Create bill item', tags=['Bill Items'])
     def post(self, **kwargs):
@@ -86,11 +84,11 @@ class BillItemResource(MethodResource):
             error = {"message": "Please provide details"}
             return (error, 400)
         try:
-            bill_item = BillItem.create(**kwargs)
+            BillItem.create(**kwargs)
         except Exception as e:
             error = {"message": str(e)}
             return error, 500
-        return bill_item, 200
+        return {}, 200
     
     @token_required
     @use_kwargs({'id': fields.Int()}, location='query')

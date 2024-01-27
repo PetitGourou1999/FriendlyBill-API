@@ -2,7 +2,7 @@ import jwt
 
 from functools import wraps
 
-from flask import request, abort
+from flask import request
 from flask import current_app
 
 from data.models import User
@@ -24,8 +24,6 @@ def token_required(f):
                 return {
                     "message": "Invalid Authentication token!",
                 }, 401
-            #if not current_user["active"]:
-            #    abort(403)
         except Exception as e:
             return {
                 "message": str(e),
