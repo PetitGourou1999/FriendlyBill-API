@@ -1,4 +1,3 @@
-from flask import make_response
 from flask_apispec import use_kwargs, marshal_with, doc
 from flask_apispec.views import MethodResource
 
@@ -8,9 +7,6 @@ from data.models import Bill, BillItem
 from data.schemas import BillSchema, BillItemSchema, ErrorSchema
 
 from api.decorators import token_required
-
-class AuthResource(MethodResource):
-    pass
 
 class BillResource(MethodResource):
 
@@ -26,8 +22,8 @@ class BillResource(MethodResource):
         bill = self._get_item(kwargs.get('id'))
         if not bill:
             error = {"message": "Bill not found"}
-            return make_response(error, 400)
-        return make_response(bill, 200)
+            return error, 400
+        return bill, 200
     
     @token_required
     @use_kwargs(BillSchema, location='json')
@@ -37,9 +33,13 @@ class BillResource(MethodResource):
     def post(self, **kwargs):
         if not kwargs:
             error = {"message": "Please provide details"}
-            return make_response(error, 400)
-        bill = Bill.create(**kwargs)
-        return make_response(bill, 200)
+            return error, 400
+        try:
+            bill = Bill.create(**kwargs)
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+        return bill, 200
     
     @token_required
     @use_kwargs({'id': fields.Int()}, location='query')
@@ -50,9 +50,13 @@ class BillResource(MethodResource):
         bill = self._get_item(kwargs.get('id'))
         if not bill:
             error = {"message": "Bill not found"}
-            return make_response(error, 400)
-        bill.delete()
-        return make_response('', 204)
+            return error, 400
+        try:
+            bill.delete()
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+        return {}, 204
 
 
 class BillItemResource(MethodResource):
@@ -69,8 +73,8 @@ class BillItemResource(MethodResource):
         bill_item = self._get_item(kwargs.get('id'))
         if not bill_item:
             error = {"message": "Bill Item not found"}
-            return make_response(error, 400)
-        return make_response(bill_item, 200)
+            return error, 400
+        return bill_item, 200
     
     @token_required
     @use_kwargs(BillItemSchema, location='json')
@@ -80,9 +84,13 @@ class BillItemResource(MethodResource):
     def post(self, **kwargs):
         if not kwargs:
             error = {"message": "Please provide details"}
-            return make_response(error, 400)
-        bill_item = BillItem.create(**kwargs)
-        return make_response(bill_item, 200)
+            return (error, 400)
+        try:
+            bill_item = BillItem.create(**kwargs)
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+        return bill_item, 200
     
     @token_required
     @use_kwargs({'id': fields.Int()}, location='query')
@@ -93,12 +101,16 @@ class BillItemResource(MethodResource):
         bill_item = self._get_item(kwargs.get('id'))
         if not bill_item:
             error = {"message": "Bill Item not found"}
-            return make_response(error, 400)
-        bill_item.delete()
-        return make_response('', 204)
+            return error, 400
+        try:
+            bill_item.delete()
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+        return {}, 204
 
 
-def register_api(application, docs):
+def register_bills_api(application, docs):
     application.add_url_rule('/api/bills', view_func=BillResource.as_view('Bill'))
     application.add_url_rule('/api/bill-items', view_func=BillItemResource.as_view('BillItem'))
 
