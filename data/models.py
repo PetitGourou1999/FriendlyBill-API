@@ -24,12 +24,18 @@ class User(BaseModel):
     def create(cls, **query):
         if query['password'] is not None:
             query['password'] = encrypt_password(query['password'])
-        return super().create(**query)    
+        return super().create(**query)
+    
+    def __str__(self) -> str:
+        return self.email
 
 
 class Bill(BaseModel):
     id = AutoField()
     title = CharField()
+
+    def __str__(self) -> str:
+        return self.title
     
 
 class BillItem(BaseModel):
@@ -37,3 +43,6 @@ class BillItem(BaseModel):
     title = CharField()
     user = ForeignKeyField(User, backref='items')
     bill = ForeignKeyField(Bill, backref='items')
+
+    def __str__(self) -> str:
+        return self.title
