@@ -48,7 +48,7 @@ app.config.update({
 docs = FlaskApiSpec(app, document_options=False)
 
 # Init Admin
-app.config['FLASK_ADMIN_SWATCH'] = 'sketchy'
+app.config['FLASK_ADMIN_SWATCH'] = 'lux'
 admin = Admin(app, name='friendly_bill', index_view=MyAdminIndexView(), template_mode='bootstrap4')
 add_admin_views(admin=admin)
 

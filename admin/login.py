@@ -37,7 +37,7 @@ class MyAdminIndexView(AdminIndexView):
         if helpers.validate_form_on_submit(form):
             user = User()
             form.populate_obj(user)
-            User.create(user)
+            User.create(**user.__data__)
 
             login_user(user)
             return redirect(url_for('.index'))

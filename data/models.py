@@ -15,6 +15,19 @@ class User(BaseModel):
     surname = CharField()
     email = CharField(unique=True)
     password = CharField()
+    is_superadmin = BooleanField(default=False)
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
 
     @classmethod
     def get_by_email(self, email):
@@ -27,6 +40,9 @@ class User(BaseModel):
         return super().create(**query)
     
     def __str__(self) -> str:
+        return self.email
+
+    def __unicode__(self):
         return self.email
 
 
