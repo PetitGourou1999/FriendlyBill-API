@@ -1,3 +1,5 @@
+import click
+
 from flask import Flask
 from flask import render_template
 
@@ -17,6 +19,8 @@ from admin.views import add_admin_views
 
 from api.auth import register_auth_api
 from api.bills import register_bills_api
+
+from commands import create_admin
 
 from data.models import User, Bill, BillItem
 from data.schemas import ErrorSchema
@@ -68,6 +72,13 @@ def load_user(user_id):
 # Register Ressources
 register_bills_api(app, docs)
 register_auth_api(app, docs)
+
+# Register cli commands
+@app.cli.command('admin', help='Manage admin user')
+@click.option('--create', help='Add admin user', is_flag=True)
+def manage_admin(create):
+    if create:
+        create_admin()
 
 # Error Handlers
 @app.errorhandler(500)

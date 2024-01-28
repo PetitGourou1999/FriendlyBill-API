@@ -1,4 +1,5 @@
 bcrypt
+click
 flask
 flask_admin
 flask_apispec

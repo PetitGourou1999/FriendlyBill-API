@@ -38,8 +38,6 @@ class MyAdminIndexView(AdminIndexView):
             user = User()
             form.populate_obj(user)
             User.create(**user.__data__)
-
-            login_user(user)
             return redirect(url_for('.index'))
         
         link = '<p>Already have an account? <a href="' + url_for('.login_view') + '">Click here to log in.</a></p>'
@@ -62,6 +60,9 @@ class LoginForm(form.Form):
 
         if user is None:
             raise validators.ValidationError('Invalid credentials')
+        
+        if not user.is_superadmin:
+            raise validators.ValidationError('Access denied')
 
         if not check_password(self.password.data, user.password):
             raise validators.ValidationError('Invalid credentials')

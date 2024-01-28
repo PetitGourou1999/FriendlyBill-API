@@ -9,9 +9,9 @@ from shortcuts import check_password
 from data.models import User
 from data.schemas import UserSchema, LoginSchema, UserTokenSchema, ErrorSchema
 
-bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
-@bp.route('/register', methods=['POST'])
+@auth_bp.route('/register', methods=['POST'])
 @use_kwargs(UserSchema, location='json')
 @marshal_with(ErrorSchema, code=400)
 @marshal_with(ErrorSchema, code=500)
@@ -27,7 +27,7 @@ def register(**kwargs):
         error = {"message": str(e)}
         return error, 500
     
-@bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST'])
 @use_kwargs(LoginSchema, location='json')
 @marshal_with(UserTokenSchema, code=200)
 @marshal_with(ErrorSchema, code=400)
@@ -61,7 +61,7 @@ def login(**kwargs):
         return error, 400
     
 def register_auth_api(application, docs):
-    application.register_blueprint(bp)
-    docs.register(register, blueprint = bp.name)
-    docs.register(login, blueprint = bp.name)
+    application.register_blueprint(auth_bp)
+    docs.register(register, blueprint = auth_bp.name)
+    docs.register(login, blueprint = auth_bp.name)
 
