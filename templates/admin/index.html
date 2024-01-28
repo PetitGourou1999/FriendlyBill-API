@@ -1,18 +1,18 @@
 {% extends 'admin/master.html' %}
 {% block body %}
 {{ super() }}
-<div class="row-fluid">
-
+<div class="d-flex py-2 flex-column justify-content-center align-items-center">
     <div>
         {% if current_user.is_authenticated %}
-        <h1>Flask-Admin example</h1>
-        <p class="lead">
-            Authentication
-        </p>
-        <p>
-            This example shows how you can use Flask-Login for authentication. It is only intended as a basic
-            demonstration.
-        </p>
+        <div class="d-flex flex-column justify-content-center align-items-center">
+            <p class="display-1 text-uppercase">Friendly_Bill</p>
+            <p class="lead">
+                Welcome to the admin console !
+            </p>
+            <p class="lead">
+                Feel free to explore data
+            </p>
+        </div>
         {% else %}
         <form method="POST" action="">
             {{ form.hidden_tag() if form.hidden_tag }}
@@ -29,12 +29,12 @@
                 {% endif %}
             </div>
             {% endfor %}
-            <button class="btn btn-primary" type="submit">Submit</button>
+            <div class="d-flex py-2">
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
         </form>
         {{ link | safe }}
         {% endif %}
     </div>
-
-    <a class="btn btn-primary" href="/"><i class="icon-arrow-left icon-white"></i> Back</a>
 </div>
 {% endblock body %}

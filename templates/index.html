@@ -3,14 +3,30 @@
 <head>
     <style>
         body {
-            background-image: url("{{url_for('static', filename='logo.png')}}");
-            background-repeat: no-repeat;
-            background-position: center;
+            background-color: #343a40;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+
+        #container {
+            display: flex;
+            flex: 1;
+            box-sizing: border-box;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #title {
+            color: #fff;
+            font-size: 10rem;
         }
     </style>
 </head>
 
 <body>
+    <div id="container">
+        <p id="title">FRIENDLY_BILL</p>
+    </div>
 </body>
 
 </html>
