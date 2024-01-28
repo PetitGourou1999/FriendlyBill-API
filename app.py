@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import render_template
 
 from flask_restful import Api
 from flask_apispec import FlaskApiSpec, marshal_with
@@ -23,6 +24,10 @@ from data.schemas import ErrorSchema
 # Init App
 app = Flask(__name__)
 api = Api(app)
+
+@app.route('/', methods=['GET'])
+def get(): 
+    return render_template('index.html')
 
 app.config.from_object(DebugConfig())
 
