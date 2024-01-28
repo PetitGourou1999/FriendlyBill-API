@@ -2,6 +2,7 @@ bcrypt
 flask
 flask_admin
 flask_apispec
+flask_login
 flask_restful
 flask_peewee
 marshmallow

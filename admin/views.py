@@ -1,3 +1,4 @@
+from flask_login import current_user
 from flask_admin.contrib.peewee import ModelView
 
 from wtforms import fields, validators
@@ -7,6 +8,9 @@ from shortcuts import encrypt_password
 from data.models import User, Bill, BillItem
 
 class UsersView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
     column_exclude_list = ['password', ]
     column_searchable_list = ['email', ]
 
@@ -38,6 +42,9 @@ class UsersView(ModelView):
 
 
 class BillsView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
     can_view_details = True
     can_export = True
 
@@ -49,6 +56,9 @@ class BillsView(ModelView):
 
 
 class BillItemsView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
     can_view_details = True
     can_export = True
 
@@ -65,8 +75,7 @@ class BillItemsView(ModelView):
     }
 
 
-
-def add_views(admin):
+def add_admin_views(admin):
     admin.add_view(UsersView(User))
     admin.add_view(BillsView(Bill))
     admin.add_view(BillItemsView(BillItem))

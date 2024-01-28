@@ -3,6 +3,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_apispec import FlaskApiSpec, marshal_with
 from flask_admin import Admin
+from flask_login import LoginManager
 from flask_peewee.db import Database
 
 from apispec import APISpec
@@ -10,7 +11,8 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 
 from config import DebugConfig
 
-from admin.views import add_views
+from admin.login import MyAdminIndexView
+from admin.views import add_admin_views
 
 from api.auth import register_auth_api
 from api.bills import register_bills_api
@@ -18,11 +20,13 @@ from api.bills import register_bills_api
 from data.models import User, Bill, BillItem
 from data.schemas import ErrorSchema
 
+# Init App
 app = Flask(__name__)
 api = Api(app)
 
 app.config.from_object(DebugConfig())
-    
+
+# Init Database
 db = Database(app)
 db.database.bind([User])
 db.database.create_tables([User])
@@ -31,6 +35,7 @@ db.database.create_tables([Bill])
 db.database.bind([BillItem])
 db.database.create_tables([BillItem])
 
+# Init Swagger
 app.config.update({
     'APISPEC_SPEC': APISpec(
         title='friendly_bill',
@@ -42,13 +47,24 @@ app.config.update({
 })
 docs = FlaskApiSpec(app, document_options=False)
 
-app.config['FLASK_ADMIN_SWATCH'] = 'united'
-admin = Admin(app, name='friendly_bill', template_mode='bootstrap3')
-add_views(admin=admin)
+# Init Admin
+app.config['FLASK_ADMIN_SWATCH'] = 'sketchy'
+admin = Admin(app, name='friendly_bill', index_view=MyAdminIndexView(), template_mode='bootstrap4')
+add_admin_views(admin=admin)
 
+# Init Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get_or_none(User.id == user_id)
+
+# Register Ressources
 register_bills_api(app, docs)
 register_auth_api(app, docs)
 
+# Error Handlers
 @app.errorhandler(500)
 @marshal_with(ErrorSchema)
 def handle_server_error(err):
