@@ -11,7 +11,7 @@ from data.schemas import CreateBillSchema, InviteUserSchema, CreateBillItemSchem
 class BillResource(MethodResource):
 
     @jwt_required()
-    @marshal_with(BillUserSchema, code=200)
+    @marshal_with(BillUserSchema(many=True), code=200)
     @marshal_with(ErrorSchema, code=400)
     @doc(description='Get bills', tags=['Bills'])
     def get(self):
@@ -57,6 +57,10 @@ class BillUserResource(MethodResource):
         bill = Bill.get_or_none(Bill.id == kwargs.get('bill_id'))
         if not bill:
             error = {"message": "Bill does not exist"}
+            return error, 400
+        bill_owner = BillUser.get_by_user_and_bill(current_user, bill)
+        if not bill_owner.is_owner:
+            error = {"message": "You are not the owner of this bill"}
             return error, 400
         bill_user = BillUser.get_by_user_and_bill(invited, bill)
         if bill_user:

@@ -62,11 +62,12 @@ class BillUser(BaseModel):
 
     @classmethod
     def get_by_user(self, user):
-        return self.get_or_none(BillUser.user == user)
-    
+        query = self.select().join(User).where(User.id == user.id).execute()
+        return list(query)
+        
     @classmethod
     def get_by_user_and_bill(self, user, bill):
-        return self.get_or_none(BillUser.user == user)
+        return self.get_or_none(BillUser.user == user, BillUser.bill == bill)
     
     def __str__(self) -> str:
         return '{} : {}'.format(self.user.email, self.bill.title)
@@ -79,7 +80,8 @@ class BillItem(BaseModel):
     
     @classmethod
     def get_by_user(self, user):
-        return self.get_or_none(BillItem.bill_user.user == user)
+        query = self.select().join(BillUser).join(User).where(User.id == user.id).execute()
+        return list(query)
     
     def __str__(self) -> str:
         return self.title
