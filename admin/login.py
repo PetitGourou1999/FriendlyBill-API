@@ -1,3 +1,5 @@
+from logzero import logger
+
 from flask import request, url_for, redirect
 from flask_login import login_user, logout_user, current_user
 from flask_admin import AdminIndexView
@@ -19,30 +21,20 @@ class MyAdminIndexView(AdminIndexView):
     @expose('/login/', methods=('GET', 'POST'))
     def login_view(self):
         form = LoginForm(request.form)
-        if helpers.validate_form_on_submit(form):
+        
+        try:
+            form.validate_login()
             user = form.get_user()
             login_user(user)
+        except validators.ValidationError as error:
+            self._template_args['validation_error'] = error
+            logger.warn(str(error))
 
         if current_user.is_authenticated:
             return redirect(url_for('.index'))
         
-        link = '<p>Don\'t have an account? <a href="' + url_for('.register_view') + '">Click here to register.</a></p>'
         self._template_args['form'] = form
-        self._template_args['link'] = link
-        return super(MyAdminIndexView, self).index()
 
-    @expose('/register/', methods=('GET', 'POST'))
-    def register_view(self):
-        form = RegistrationForm(request.form)
-        if helpers.validate_form_on_submit(form):
-            user = User()
-            form.populate_obj(user)
-            User.create(**user.__data__)
-            return redirect(url_for('.index'))
-        
-        link = '<p>Already have an account? <a href="' + url_for('.login_view') + '">Click here to log in.</a></p>'
-        self._template_args['form'] = form
-        self._template_args['link'] = link
         return super(MyAdminIndexView, self).index()
 
     @expose('/logout/')
@@ -55,28 +47,20 @@ class LoginForm(form.Form):
     email = fields.EmailField(validators=[validators.InputRequired()])
     password = fields.PasswordField(validators=[validators.InputRequired()])
 
-    def validate_login(self, field):
+    def validate_login(self):
         user = self.get_user()
-
+        
         if user is None:
+            logger.info('LoginForm >>> user <%s> does not exists', self.email.data)
             raise validators.ValidationError('Invalid credentials')
         
         if not user.is_superadmin:
+            logger.info('LoginForm >>> user <%s> is not an admin', self.email.data)
             raise validators.ValidationError('Access denied')
 
         if not check_password(self.password.data, user.password):
+            logger.info('LoginForm >>> user password is invalid')
             raise validators.ValidationError('Invalid credentials')
 
     def get_user(self):
         return User.get_by_email(self.email.data)
-
-
-class RegistrationForm(form.Form):
-    firstname = fields.StringField(validators=[validators.InputRequired()])
-    surname = fields.StringField(validators=[validators.InputRequired()])
-    email = fields.EmailField(validators=[validators.InputRequired()])
-    password = fields.PasswordField(validators=[validators.InputRequired()])
-
-    def validate_login(self, field):
-        if User.get_by_email(self.email.data) is not None:
-            raise validators.ValidationError('Email already taken')

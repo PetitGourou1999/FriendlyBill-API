@@ -1,5 +1,7 @@
 import click
 
+import logzero
+
 from flask import Flask
 from flask import render_template
 
@@ -34,6 +36,9 @@ def get():
     return render_template('index.html')
 
 app.config.from_object(DebugConfig())
+
+# Init logging
+logzero.logfile('logs/friendly_bill.log')
 
 # Init Database
 db = Database(app)

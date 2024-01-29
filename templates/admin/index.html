@@ -29,11 +29,15 @@
                 {% endif %}
             </div>
             {% endfor %}
+            {% if validation_error %}
+            <div class="alert-error">
+                {{ validation_error }}
+            </div>
+            {% endif %}
             <div class="d-flex py-2">
                 <button class="btn btn-primary" type="submit">Submit</button>
             </div>
         </form>
-        {{ link | safe }}
         {% endif %}
     </div>
 </div>

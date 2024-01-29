@@ -6,6 +6,7 @@ flask_apispec
 flask_login
 flask_restful
 flask_peewee
+logzero
 marshmallow
 peewee
 pytest
