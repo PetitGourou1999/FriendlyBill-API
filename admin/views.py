@@ -5,7 +5,7 @@ from wtforms import fields, validators
 
 from shortcuts import encrypt_password
 
-from data.models import User, Bill, BillItem
+from data.models import User, Bill, BillUser, BillItem
 
 class UsersView(ModelView):
     def is_accessible(self):
@@ -55,6 +55,23 @@ class BillsView(ModelView):
     }
 
 
+class BillUsersView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    can_view_details = True
+    can_export = True
+
+    form_args = {
+        'user': {
+            'validators': [validators.InputRequired()]
+        },
+        'bill': {
+            'validators': [validators.InputRequired()]
+        },
+    }
+
+
 class BillItemsView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated
@@ -69,13 +86,11 @@ class BillItemsView(ModelView):
         'user': {
             'validators': [validators.InputRequired()]
         },
-        'bill': {
-            'validators': [validators.InputRequired()]
-        },
     }
 
 
 def add_admin_views(admin):
     admin.add_view(UsersView(User))
     admin.add_view(BillsView(Bill))
+    admin.add_view(BillUsersView(BillUser))
     admin.add_view(BillItemsView(BillItem))

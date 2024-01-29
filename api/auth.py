@@ -1,8 +1,6 @@
-import jwt
-
 from flask import Blueprint
-from flask import current_app
 from flask_apispec import use_kwargs, marshal_with, doc
+from flask_jwt_extended import create_access_token
 
 from shortcuts import check_password
 
@@ -19,6 +17,9 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 def register(**kwargs):
     if not kwargs:
         error = {"message": "Please provide details"}
+        return error, 400
+    if kwargs.get('is_superadmin') is True:
+        error = {"message": "Superadmins cannot be created this way"}
         return error, 400
     try:
         User.create(**kwargs)
@@ -43,14 +44,9 @@ def login(**kwargs):
             error = {"message": "Invalid email or password"}
             return error, 400
         try:
-            user_token = jwt.encode(
-                {"user_id": user.id},
-                current_app.config["SECRET_KEY"],
-                algorithm="HS256"
-            )
             authenticated_user = {
                 "user": user,
-                "token": user_token
+                "token": create_access_token(identity=user)
             }
             return authenticated_user, 200
         except Exception as e:
@@ -59,7 +55,8 @@ def login(**kwargs):
     except Exception as e:
         error = {"message": str(e)}
         return error, 400
-    
+
+
 def register_auth_api(application, docs):
     application.register_blueprint(auth_bp)
     docs.register(register, blueprint = auth_bp.name)

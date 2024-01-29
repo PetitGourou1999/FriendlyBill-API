@@ -14,7 +14,7 @@ class UserSchema(BaseSchema):
     surname = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
-
+    is_superadmin = fields.Bool()
 
     class Meta(BaseSchema.Meta):
         additional = ('duration',)
@@ -38,17 +38,41 @@ class BillSchema(BaseSchema):
     class Meta(BaseSchema.Meta):
         additional = ('duration',)
         ordered = True
-    
 
-class BillItemSchema(BaseSchema):
+
+class BillUserSchema(BaseSchema):
     id = fields.Int(dump_only=True)
-    title = fields.Str(required=True)
     user = fields.Nested(UserSchema)
     bill = fields.Nested(BillSchema)
+    is_owner = fields.Bool()
 
     class Meta(BaseSchema.Meta):
         additional = ('duration',)
         ordered = True
+
+
+class CreateBillSchema(Schema):
+    title = fields.Str(required=True)
+
+
+class InviteUserSchema(Schema):
+    user_email = fields.Email(required=True)
+    bill_id = fields.Int(required=True)
+
+
+class BillItemSchema(BaseSchema):
+    id = fields.Int(dump_only=True)
+    title = fields.Str(required=True)
+    user = fields.Nested(BillUserSchema)
+    
+    class Meta(BaseSchema.Meta):
+        additional = ('duration',)
+        ordered = True
+
+
+class CreateBillItemSchema(Schema):
+    title = fields.Str(required=True)
+    bill_id = fields.Int(required=True)
 
 
 class ErrorSchema(Schema):

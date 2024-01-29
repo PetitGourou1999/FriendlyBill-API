@@ -52,13 +52,38 @@ class Bill(BaseModel):
 
     def __str__(self) -> str:
         return self.title
+
+ 
+class BillUser(BaseModel):
+    id = AutoField()
+    user = ForeignKeyField(User, backref='bills')
+    bill = ForeignKeyField(Bill, backref='users')
+    is_owner = BooleanField(default=False)
+
+    @classmethod
+    def get_by_user(self, user):
+        return self.get_or_none(BillUser.user == user)
     
+    @classmethod
+    def get_by_user_and_bill(self, user, bill):
+        return self.get_or_none(BillUser.user == user)
+    
+    def __str__(self) -> str:
+        return '{} : {}'.format(self.user.email, self.bill.title)
+
 
 class BillItem(BaseModel):
     id = AutoField()
     title = CharField()
-    user = ForeignKeyField(User, backref='items')
-    bill = ForeignKeyField(Bill, backref='items')
-
+    bill_user = ForeignKeyField(BillUser, backref='items')
+    
+    @classmethod
+    def get_by_user(self, user):
+        return self.get_or_none(BillItem.bill_user.user == user)
+    
     def __str__(self) -> str:
         return self.title
+    
+
+def register_database(db):
+    db.database.bind([User, Bill, BillUser, BillItem])

@@ -1,6 +1,6 @@
 import click
 
-from data.models import User
+from data.models import User, Bill, BillUser, BillItem
 
 def create_admin():
     if User.get_or_none(User.is_superadmin) is not None:
@@ -20,3 +20,11 @@ def create_admin():
         click.echo('User added.')
     else:
         click.echo('An error occurred')
+
+def create_database(db):
+    db.database.create_tables([User, Bill, BillUser, BillItem])
+
+def reset_database(db):
+    db.database.drop_tables([User, Bill, BillUser, BillItem])
+    create_database(db)
+

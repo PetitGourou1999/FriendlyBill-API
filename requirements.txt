@@ -3,6 +3,7 @@ click
 flask
 flask_admin
 flask_apispec
+flask_jwt_extended
 flask_login
 flask_restful
 flask_peewee
@@ -10,5 +11,4 @@ logzero
 marshmallow
 peewee
 pytest
-pyjwt
 wtforms
