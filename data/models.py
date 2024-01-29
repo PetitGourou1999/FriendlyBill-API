@@ -35,7 +35,7 @@ class User(BaseModel):
     
     @classmethod
     def create(cls, **query):
-        if query['password'] is not None:
+        if query['password']:
             query['password'] = encrypt_password(query['password'])
         return super().create(**query)
     

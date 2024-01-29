@@ -3,11 +3,11 @@ import click
 from data.models import User, Bill, BillUser, BillItem
 
 def create_admin():
-    if User.get_or_none(User.is_superadmin) is not None:
+    if User.get_or_none(User.is_superadmin == True):
         click.confirm('An admin user already exists ! Create another ?', abort=True)
     
     email = click.prompt('Email address', type=click.STRING)
-    if User.get_by_email(email) is not None:
+    if User.get_by_email(email):
         raise click.UsageError('Email already taken')
 
     firstname = click.prompt('Firstname', type=click.STRING)
@@ -16,7 +16,7 @@ def create_admin():
     
     user = User.create(firstname=firstname, surname=surname, email=email, password=password, is_superadmin=True)
 
-    if user is not None:
+    if user:
         click.echo('User added.')
     else:
         click.echo('An error occurred')
