@@ -56,8 +56,8 @@ class Bill(BaseModel):
  
 class BillUser(BaseModel):
     id = AutoField()
-    user = ForeignKeyField(User, backref='bills')
-    bill = ForeignKeyField(Bill, backref='users')
+    user = ForeignKeyField(User, backref='bills', on_delete='CASCADE')
+    bill = ForeignKeyField(Bill, backref='users', on_delete='CASCADE')
     is_owner = BooleanField(default=False)
 
     @classmethod
@@ -76,7 +76,7 @@ class BillUser(BaseModel):
 class BillItem(BaseModel):
     id = AutoField()
     title = CharField()
-    bill_user = ForeignKeyField(BillUser, backref='items')
+    bill_user = ForeignKeyField(BillUser, backref='items', on_delete='CASCADE')
     
     @classmethod
     def get_by_user(self, user):
