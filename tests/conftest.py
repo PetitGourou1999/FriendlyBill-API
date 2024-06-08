@@ -1,23 +1,30 @@
 import pytest
 
-from app import app
+from flask_jwt_extended import create_access_token
+
+from app import app, db
 from config import TestingConfig
 
-from data.models import User, Bill, BillUser, BillItem
+from data.models import User, Bill, BillUser, BillItem, MODELS
 
 @pytest.fixture
 def application():
     app.config.from_object(TestingConfig())
+    ctx = app.test_request_context()
+    ctx.push()
     yield app
+    ctx.pop()
+    db.database.drop_tables(MODELS)
+    db.database.create_tables(MODELS)    
 
 @pytest.fixture()
 def client(application):
-    return application.test_client()
+    yield application.test_client()
 
 @pytest.fixture()
 def runner(application):
-    return application.test_cli_runner()
-
+    yield application.test_cli_runner()
+    
 @pytest.fixture
 def user_admin_email():
     return 'admin@admin.com'
@@ -44,7 +51,7 @@ def user_admin(client, user_admin_email, user_admin_password):
     if admin is None:
         admin = User.create(firstname='John', surname='Doe', 
                            email=user_admin_email, 
-                           password=User.encrypt_password(user_admin_password), 
+                           password=user_admin_password, 
                            created_date='2023-01-01 00:00:00.000000', 
                            updated_date='2023-01-01 00:00:00.000000')
     yield admin
@@ -70,4 +77,15 @@ def bill_user(client, user_admin, bill):
 
 @pytest.fixture
 def bill_item(client, bill_user, bill_item_title, bill_item_amount):
+    bill_item = BillItem.get_by_title(bill_item_title)
+    if not bill_item:
+        bill_item = BillItem.create(title=bill_item_title, amount=bill_item_amount,
+                        bill_user=bill_user,
+                        created_date='2023-01-01 00:00:00.000000', 
+                        updated_date='2023-01-01 00:00:00.000000')
+    yield bill_item
 
+@pytest.fixture    
+def user_admin_token_header(user_admin):
+    access_token = create_access_token(identity=user_admin, expires_delta=False, fresh=True)
+    return {'Authorization': 'Bearer {}'.format(access_token)}

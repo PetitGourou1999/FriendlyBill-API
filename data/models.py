@@ -103,5 +103,7 @@ class BillItem(BaseModel):
         return self.title
     
 
+MODELS = [User, Bill, BillUser, BillItem]
+
 def register_database(db):
-    db.database.bind([User, Bill, BillUser, BillItem])
+    db.database.bind(MODELS)

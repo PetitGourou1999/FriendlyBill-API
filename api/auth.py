@@ -21,6 +21,9 @@ def register(**kwargs):
     if kwargs.get('is_superadmin') is True:
         error = {"message": "Superadmins cannot be created this way"}
         return error, 400
+    if User.get_by_email(kwargs.get('email')):
+        error = {"message": "Email already taken"}
+        return error, 400
     try:
         User.create(**kwargs)
         return {}, 201

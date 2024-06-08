@@ -28,5 +28,6 @@ class TestingConfig(object):
     }
     SECRET_KEY = 'SuperSecret'
     JWT_SECRET_KEY = 'SuperSecretJWT'
+    JWT_BLACKLIST_ENABLED = False
     TESTING = True
 

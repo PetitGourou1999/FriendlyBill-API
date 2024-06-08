@@ -1,6 +1,6 @@
 import click
 
-from data.models import User, Bill, BillUser, BillItem
+from data.models import User, MODELS
 
 def create_admin():
     if User.get_or_none(User.is_superadmin == True):
@@ -22,9 +22,9 @@ def create_admin():
         click.echo('An error occurred')
 
 def create_database(db):
-    db.database.create_tables([User, Bill, BillUser, BillItem])
+    db.database.create_tables(MODELS)
 
 def reset_database(db):
-    db.database.drop_tables([User, Bill, BillUser, BillItem])
+    db.database.drop_tables(MODELS)
     create_database(db)
 
