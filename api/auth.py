@@ -57,7 +57,7 @@ def login(**kwargs):
         return error, 400
 
 @jwt_required()
-@auth_bp.route('/account/delete', methods=['POST'])
+@auth_bp.route('/account', methods=['DELETE'])
 @marshal_with(ErrorSchema, code=400)
 @marshal_with(ErrorSchema, code=500)
 @doc(description='Delete user account', tags=['Auth'])

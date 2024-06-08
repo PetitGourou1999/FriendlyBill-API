@@ -1,8 +1,8 @@
-from logzero import logger
-
 from flask_apispec import use_kwargs, marshal_with, doc
 from flask_apispec.views import MethodResource
 from flask_jwt_extended import jwt_required, current_user
+
+from webargs import fields
 
 from data.models import User, Bill, BillUser, BillItem
 from data.schemas import BillUserSchema, BillItemSchema, ErrorSchema
@@ -17,7 +17,7 @@ class BillResource(MethodResource):
     def get(self):
         bills = BillUser.get_by_user(current_user)
         if not bills:
-            error = {"message": "Bills not found"}
+            error = {"message": "Not found"}
             return error, 400
         return bills, 200
     
@@ -37,6 +37,30 @@ class BillResource(MethodResource):
             error = {"message": str(e)}
             return error, 500
         return {}, 201
+    
+    @jwt_required()
+    @use_kwargs({"id": fields.Int()}, location="query")
+    @marshal_with(ErrorSchema, code=400)
+    @marshal_with(ErrorSchema, code=500)
+    @doc(description='Delete bill', tags=['Bills'])
+    def delete(self, **kwargs):
+        if not kwargs:
+            error = {"message": "Please provide an id"}
+            return error, 400
+        bill = Bill.get_or_none(Bill.id == kwargs.get('id'))
+        if not bill:
+            error = {"message": "Not found"}
+            return error, 400
+        bill_user = BillUser.get_by_user_and_bill(current_user, bill)
+        if not bill_user.is_owner:
+            error = {"message": "You are not the owner of this bill"}
+            return error, 400
+        try:
+            bill.delete_instance(recursive=True)
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+        return {}, 204
     
 
 class BillUserResource(MethodResource):
@@ -72,7 +96,31 @@ class BillUserResource(MethodResource):
             error = {"message": str(e)}
             return error, 500
         return {}, 201
-    
+
+    @jwt_required()
+    @use_kwargs({"id": fields.Int()}, location="query")
+    @marshal_with(ErrorSchema, code=400)
+    @marshal_with(ErrorSchema, code=500)
+    @doc(description='Remove user from bill', tags=['Bill Users'])
+    def delete(self, **kwargs):
+        if not kwargs:
+            error = {"message": "Please provide an id"}
+            return error, 400
+        bill_user = BillUser.get_or_none(BillUser.id == kwargs.get('id'))
+        if not bill_user:
+            error = {"message": "Not found"}
+            return error, 400
+        bill_owner = BillUser.get_by_user_and_bill(current_user, bill_user.bill)
+        if not bill_owner.is_owner:
+            error = {"message": "You are not the owner of this bill"}
+            return error, 400
+        try:
+            bill_user.delete_instance(recursive=True)
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+        return {}, 204
+
 
 class BillItemResource(MethodResource):
 
@@ -83,7 +131,7 @@ class BillItemResource(MethodResource):
     def get(self):
         bill_items = BillItem.get_by_user(current_user)
         if not bill_items:
-            error = {"message": "Bill Items not found"}
+            error = {"message": "Not found"}
             return error, 400
         return bill_items, 200
     
@@ -110,7 +158,27 @@ class BillItemResource(MethodResource):
             error = {"message": str(e)}
             return error, 500
         return {}, 201
-    
+
+    @jwt_required()
+    @use_kwargs({"id": fields.Int()}, location="query")
+    @marshal_with(ErrorSchema, code=400)
+    @marshal_with(ErrorSchema, code=500)
+    @doc(description='Delete bill item', tags=['Bill Items'])
+    def delete(self, **kwargs):
+        if not kwargs:
+            error = {"message": "Please provide details"}
+            return error, 400
+        bill_item = BillItem.get_or_none(BillItem.id == kwargs.get('id'))
+        if not bill_item:
+            error = {"message": "Not found"}
+            return error, 400
+        try:
+            bill_item.delete_instance(recursive=True)
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+        return {}, 201
+
 
 def register_bills_api(application, docs):
     application.add_url_rule('/api/bills', view_func=BillResource.as_view('Bills'))
