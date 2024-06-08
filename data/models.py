@@ -50,6 +50,11 @@ class Bill(BaseModel):
     id = AutoField()
     title = CharField()
 
+    @classmethod
+    def get_by_title(self, title):
+        query = self.select().where(Bill.title == title).execute()
+        return list(query)
+    
     def __str__(self) -> str:
         return self.title
 
@@ -69,6 +74,11 @@ class BillUser(BaseModel):
     def get_by_user_and_bill(self, user, bill):
         return self.get_or_none(BillUser.user == user, BillUser.bill == bill)
     
+    class Meta:
+        indexes = (
+            (('user', 'bill'), True),
+        )
+    
     def __str__(self) -> str:
         return '{} : {}'.format(self.user.email, self.bill.title)
 
@@ -76,11 +86,17 @@ class BillUser(BaseModel):
 class BillItem(BaseModel):
     id = AutoField()
     title = CharField()
+    amount = DoubleField()
     bill_user = ForeignKeyField(BillUser, backref='items', on_delete='CASCADE')
     
     @classmethod
     def get_by_user(self, user):
         query = self.select().join(BillUser).join(User).where(User.id == user.id).execute()
+        return list(query)
+    
+    @classmethod
+    def get_by_title(self, title):
+        query = self.select().where(BillItem.title == title).execute()
         return list(query)
     
     def __str__(self) -> str:

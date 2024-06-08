@@ -63,6 +63,7 @@ class InviteUserSchema(Schema):
 class BillItemSchema(BaseSchema):
     id = fields.Int(dump_only=True)
     title = fields.Str(required=True)
+    amount = fields.Decimal(required=True, min=0)
     user = fields.Nested(BillUserSchema)
     
     class Meta(BaseSchema.Meta):
@@ -72,6 +73,7 @@ class BillItemSchema(BaseSchema):
 
 class CreateBillItemSchema(Schema):
     title = fields.Str(required=True)
+    amount = fields.Decimal(required=True, min=0)
     bill_id = fields.Int(required=True)
 
 

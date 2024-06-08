@@ -153,7 +153,8 @@ class BillItemResource(MethodResource):
             error = {"message": "You cannot add items to this bill"}
             return error, 400
         try:
-            BillItem.create(title=kwargs.get('title'), bill_user=bill_user)
+            BillItem.create(title=kwargs.get('title'), amount=kwargs.get('amount'), 
+                            bill_user=bill_user)
         except Exception as e:
             error = {"message": str(e)}
             return error, 500
