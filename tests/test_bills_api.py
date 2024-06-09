@@ -75,7 +75,7 @@ def test_invite_user_user_does_not_exist(client, all_data, user_admin_token_head
 def test_invite_user_bill_does_not_exist(client, all_data, user_basic_email, user_admin_token_header):
     response = client.post('/api/bills/users', headers=user_admin_token_header, json={
         'user_email': user_basic_email,
-        'bill_id': '2'
+        'bill_id': '99'
     })
     assert response.status_code == 400
     assert response.json['message'] == 'Bill does not exist'
@@ -106,7 +106,59 @@ def test_invite_user(client, all_data, other_user_basic, bill, other_user_basic_
     bill_user = BillUser.get_by_user_and_bill(other_user_basic, bill)
     assert bill_user
     assert bill_user.is_owner is False
+
+def test_transfer_ownership_no_token(client):
+    response = client.put('/api/bills/users', json={})
+    assert response.status_code == 401
     
+def test_transfer_ownership_no_body(client, user_admin, user_admin_token_header):
+    response = client.put('/api/bills/users', headers=user_admin_token_header, json={})
+    assert response.status_code == 422
+    
+def test_transfer_ownership_user_does_not_exist(client, all_data, user_admin_token_header):
+    response = client.put('/api/bills/users', headers=user_admin_token_header, json={
+        'user_email': 'nobody@gmail.com',
+        'bill_id': '1'
+    })
+    assert response.status_code == 400
+    assert response.json['message'] == 'User does not exist'
+
+def test_transfer_ownership_bill_does_not_exist(client, all_data, user_basic_email, user_admin_token_header):
+    response = client.put('/api/bills/users', headers=user_admin_token_header, json={
+        'user_email': user_basic_email,
+        'bill_id': '99'
+    })
+    assert response.status_code == 400
+    assert response.json['message'] == 'Bill does not exist'
+
+def test_transfer_ownership_user_not_owner(client, all_data, user_basic_email, user_basic_token_header):
+    response = client.put('/api/bills/users', headers=user_basic_token_header, json={
+        'user_email': user_basic_email,
+        'bill_id': '1'
+    })
+    assert response.status_code == 400
+    assert response.json['message'] == 'You are not the owner of this bill'
+
+def test_transfer_ownership_user_not_invited(client, all_data, other_user_basic_email, user_admin_token_header):
+    response = client.put('/api/bills/users', headers=user_admin_token_header, json={
+        'user_email': other_user_basic_email,
+        'bill_id': '1'
+    })
+    assert response.status_code == 400
+    assert response.json['message'] == 'User has not been invited'
+
+def test_transfer_ownership(client, all_data, user_admin, user_basic, bill, user_basic_email, user_admin_token_header):
+    response = client.put('/api/bills/users', headers=user_admin_token_header, json={
+        'user_email': user_basic_email,
+        'bill_id': '1'
+    })
+    assert response.status_code == 204
+    
+    old_owner = BillUser.get_by_user_and_bill(user_admin, bill)
+    new_owner = BillUser.get_by_user_and_bill(user_basic, bill)
+    assert old_owner.is_owner is False
+    assert new_owner.is_owner is True
+
 def test_delete_bill_user_no_token(client):
     response = client.delete('/api/bills/users?id=1')
     assert response.status_code == 401

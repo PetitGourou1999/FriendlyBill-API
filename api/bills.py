@@ -89,6 +89,34 @@ class BillUserResource(MethodResource):
         return {}, 201
 
     @jwt_required()
+    @use_kwargs(InviteUserSchema, location='json')
+    @marshal_with(ErrorSchema, code=400)
+    @marshal_with(ErrorSchema, code=500)
+    @doc(description='Transfer ownership', tags=['Bill Users'])
+    def put(self, **kwargs):
+        new_owner = User.get_by_email(kwargs.get('user_email'))
+        if not new_owner:
+            error = {"message": "User does not exist"}
+            return error, 400
+        bill = Bill.get_or_none(Bill.id == kwargs.get('bill_id'))
+        if not bill:
+            error = {"message": "Bill does not exist"}
+            return error, 400
+        old_bill_user_owner = BillUser.get_by_user_and_bill(current_user, bill)
+        if not old_bill_user_owner.is_owner:
+            error = {"message": "You are not the owner of this bill"}
+            return error, 400
+        new_bill_user_owner = BillUser.get_by_user_and_bill(new_owner, bill)
+        if not new_bill_user_owner:
+            error = {"message": "User has not been invited"}
+            return error, 400
+        old_bill_user_owner.is_owner = False
+        new_bill_user_owner.is_owner = True
+        old_bill_user_owner.save()
+        new_bill_user_owner.save()
+        return {}, 204
+    
+    @jwt_required()
     @use_kwargs({"id": fields.Int()}, location="query")
     @marshal_with(ErrorSchema, code=400)
     @marshal_with(ErrorSchema, code=500)
