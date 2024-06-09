@@ -1,5 +1,6 @@
 bcrypt
 click
+coverage
 flask
 flask_admin
 flask_apispec

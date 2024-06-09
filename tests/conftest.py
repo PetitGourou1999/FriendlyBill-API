@@ -27,10 +27,26 @@ def runner(application):
     
 @pytest.fixture
 def user_admin_email():
-    return 'admin@admin.com'
+    return 'admin@gmail.com'
 
 @pytest.fixture
 def user_admin_password():
+    return 'SuperSecret'
+
+@pytest.fixture
+def user_basic_email():
+    return 'user@gmail.com'
+
+@pytest.fixture
+def user_basic_password():
+    return 'SuperSecret'
+
+@pytest.fixture
+def other_user_basic_email():
+    return 'other.user@gmail.com'
+
+@pytest.fixture
+def other_user_basic_password():
     return 'SuperSecret'
 
 @pytest.fixture
@@ -57,6 +73,28 @@ def user_admin(client, user_admin_email, user_admin_password):
     yield admin
 
 @pytest.fixture
+def user_basic(client, user_basic_email, user_basic_password):
+    user = User.get_by_email(user_basic_email)
+    if user is None:
+        user = User.create(firstname='John', surname='Doe', 
+                           email=user_basic_email, 
+                           password=user_basic_password, 
+                           created_date='2023-01-01 00:00:00.000000', 
+                           updated_date='2023-01-01 00:00:00.000000')
+    yield user
+
+@pytest.fixture
+def other_user_basic(client, other_user_basic_email, other_user_basic_password):
+    user = User.get_by_email(other_user_basic_email)
+    if user is None:
+        user = User.create(firstname='John', surname='Doe', 
+                           email=other_user_basic_email, 
+                           password=other_user_basic_password, 
+                           created_date='2023-01-01 00:00:00.000000', 
+                           updated_date='2023-01-01 00:00:00.000000')
+    yield user
+
+@pytest.fixture
 def bill(client, bill_title):
     bill = Bill.get_by_title(bill_title)
     if not bill:
@@ -66,26 +104,45 @@ def bill(client, bill_title):
     yield bill
 
 @pytest.fixture
-def bill_user(client, user_admin, bill):
+def bill_user_admin(client, user_admin, bill):
     bill_user = BillUser.get_by_user_and_bill(user_admin, bill)
     if bill_user is None:
-        bill_user = Bill.create(user=user_admin, bill=bill, is_owner=True,
+        bill_user = BillUser.create(user=user_admin, bill=bill, is_owner=True,
                                 created_date='2023-01-01 00:00:00.000000', 
                                 updated_date='2023-01-01 00:00:00.000000')
     
     yield bill_user
 
 @pytest.fixture
-def bill_item(client, bill_user, bill_item_title, bill_item_amount):
+def bill_user_basic(client, user_basic, bill):
+    bill_user = BillUser.get_by_user_and_bill(user_basic, bill)
+    if bill_user is None:
+        bill_user = BillUser.create(user=user_basic, bill=bill, is_owner=False,
+                                created_date='2023-01-01 00:00:00.000000', 
+                                updated_date='2023-01-01 00:00:00.000000')
+    
+    yield bill_user
+
+@pytest.fixture
+def bill_item(client, bill_user_admin, bill_item_title, bill_item_amount):
     bill_item = BillItem.get_by_title(bill_item_title)
     if not bill_item:
         bill_item = BillItem.create(title=bill_item_title, amount=bill_item_amount,
-                        bill_user=bill_user,
+                        bill_user=bill_user_admin,
                         created_date='2023-01-01 00:00:00.000000', 
                         updated_date='2023-01-01 00:00:00.000000')
     yield bill_item
 
+@pytest.fixture
+def all_data(client, user_admin, user_basic, other_user_basic, bill, bill_user_admin, bill_user_basic, bill_item):
+    pass
+    
 @pytest.fixture    
 def user_admin_token_header(user_admin):
     access_token = create_access_token(identity=user_admin, expires_delta=False, fresh=True)
+    return {'Authorization': 'Bearer {}'.format(access_token)}
+
+@pytest.fixture    
+def user_basic_token_header(user_basic):
+    access_token = create_access_token(identity=user_basic, expires_delta=False, fresh=True)
     return {'Authorization': 'Bearer {}'.format(access_token)}
