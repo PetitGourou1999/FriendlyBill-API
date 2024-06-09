@@ -27,9 +27,6 @@ class BillResource(MethodResource):
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Create bill', tags=['Bills'])
     def post(self, **kwargs):
-        if not kwargs:
-            error = {"message": "Please provide details"}
-            return error, 400
         try:
             bill = Bill.create(title=kwargs.get('title'))
             BillUser.create(user=current_user, bill=bill, is_owner=True)
@@ -44,9 +41,6 @@ class BillResource(MethodResource):
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Delete bill', tags=['Bills'])
     def delete(self, **kwargs):
-        if not kwargs:
-            error = {"message": "Please provide an id"}
-            return error, 400
         bill = Bill.get_or_none(Bill.id == kwargs.get('id'))
         if not bill:
             error = {"message": "Not found"}
@@ -71,9 +65,6 @@ class BillUserResource(MethodResource):
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Invite user', tags=['Bill Users'])
     def post(self, **kwargs):
-        if not kwargs:
-            error = {"message": "Please provide details"}
-            return error, 400
         invited = User.get_by_email(kwargs.get('user_email'))
         if not invited:
             error = {"message": "User does not exist"}
@@ -103,9 +94,6 @@ class BillUserResource(MethodResource):
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Remove user from bill', tags=['Bill Users'])
     def delete(self, **kwargs):
-        if not kwargs:
-            error = {"message": "Please provide an id"}
-            return error, 400
         bill_user = BillUser.get_or_none(BillUser.id == kwargs.get('id'))
         if not bill_user:
             error = {"message": "Not found"}
@@ -141,9 +129,6 @@ class BillItemResource(MethodResource):
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Create bill item', tags=['Bill Items'])
     def post(self, **kwargs):
-        if not kwargs:
-            error = {"message": "Please provide details"}
-            return error, 400
         bill = Bill.get_or_none(Bill.id == kwargs.get('bill_id'))
         if not bill:
             error = {"message": "Bill does not exist"}
@@ -166,9 +151,6 @@ class BillItemResource(MethodResource):
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Delete bill item', tags=['Bill Items'])
     def delete(self, **kwargs):
-        if not kwargs:
-            error = {"message": "Please provide details"}
-            return error, 400
         bill_item = BillItem.get_or_none(BillItem.id == kwargs.get('id'))
         if not bill_item:
             error = {"message": "Not found"}
@@ -178,7 +160,7 @@ class BillItemResource(MethodResource):
         except Exception as e:
             error = {"message": str(e)}
             return error, 500
-        return {}, 201
+        return {}, 204
 
 
 def register_bills_api(application, docs):

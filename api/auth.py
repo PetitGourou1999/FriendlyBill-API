@@ -15,9 +15,6 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 @marshal_with(ErrorSchema, code=500)
 @doc(description='Register new user', tags=['Auth'])
 def register(**kwargs):
-    if not kwargs:
-        error = {"message": "Please provide details"}
-        return error, 400
     if kwargs.get('is_superadmin') is True:
         error = {"message": "Superadmins cannot be created this way"}
         return error, 400
@@ -38,9 +35,6 @@ def register(**kwargs):
 @marshal_with(ErrorSchema, code=500)
 @doc(description='Login user', tags=['Auth'])
 def login(**kwargs):
-    if not kwargs:
-        error = {"message": "Please provide details"}
-        return error, 400
     try:
         user = User.get_by_email(kwargs.get('email'))
         if not user or not check_password(kwargs.get('password'), user.password):

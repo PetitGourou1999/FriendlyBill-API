@@ -11,11 +11,17 @@ pip3 install -r requirements.txt
 ## How to run tests
 
 ```
-pytest
+python -m pytest
 ```
 
 ## How to run app
 
 ```
-python3 main.py
+flask run
 ```
+
+## TODO
+
+- If not the creator of BillItem -> cannot delete
+- If owner of the Bill -> cannot delete BillUser associated to owner
+- Route for transfering ownership before being able to delete owner BillUser

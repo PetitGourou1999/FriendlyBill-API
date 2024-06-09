@@ -146,3 +146,8 @@ def user_admin_token_header(user_admin):
 def user_basic_token_header(user_basic):
     access_token = create_access_token(identity=user_basic, expires_delta=False, fresh=True)
     return {'Authorization': 'Bearer {}'.format(access_token)}
+
+@pytest.fixture    
+def other_user_basic_token_header(other_user_basic):
+    access_token = create_access_token(identity=other_user_basic, expires_delta=False, fresh=True)
+    return {'Authorization': 'Bearer {}'.format(access_token)}
