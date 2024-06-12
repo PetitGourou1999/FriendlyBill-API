@@ -24,4 +24,4 @@ flask run
 
 - If not the creator of BillItem -> cannot delete
 - If owner of the Bill -> cannot delete BillUser associated to owner
-- Route for transfering ownership before being able to delete owner BillUser
+- OTP API route and model

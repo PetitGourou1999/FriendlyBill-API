@@ -1,12 +1,19 @@
 import click
 
+from email_validator import validate_email, EmailNotValidError
+
 from data.models import User, MODELS
 
 def create_admin():
-    if User.get_or_none(User.is_superadmin == True):
+    if len(User.get_superadmins()) > 0:
         click.confirm('An admin user already exists ! Create another ?', abort=True)
     
     email = click.prompt('Email address', type=click.STRING)
+    try:
+        validate_email(email, check_deliverability=False)
+    except EmailNotValidError:
+        raise click.UsageError('Email is not valid')
+            
     if User.get_by_email(email):
         raise click.UsageError('Email already taken')
 
@@ -17,7 +24,7 @@ def create_admin():
     user = User.create(firstname=firstname, surname=surname, email=email, password=password, is_superadmin=True)
 
     if user:
-        click.echo('User added.')
+        click.echo('User added')
     else:
         click.echo('An error occurred')
 

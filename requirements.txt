@@ -1,6 +1,7 @@
 bcrypt
 click
 coverage
+email_validator
 flask
 flask_admin
 flask_apispec

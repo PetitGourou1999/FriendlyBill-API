@@ -68,6 +68,7 @@ def user_admin(client, user_admin_email, user_admin_password):
         admin = User.create(firstname='John', surname='Doe', 
                            email=user_admin_email, 
                            password=user_admin_password, 
+                           is_superadmin=True,
                            created_date='2023-01-01 00:00:00.000000', 
                            updated_date='2023-01-01 00:00:00.000000')
     yield admin

@@ -34,6 +34,11 @@ class User(BaseModel):
         return self.get_or_none(User.email == email)
     
     @classmethod
+    def get_superadmins(self):
+        query = self.select().where(User.is_superadmin == True).execute()
+        return list(query)
+    
+    @classmethod
     def create(cls, **query):
         if query['password']:
             query['password'] = encrypt_password(query['password'])
