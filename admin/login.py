@@ -56,7 +56,7 @@ class LoginForm(form.Form):
         
         if not user.is_superadmin:
             logger.info('LoginForm >>> user <%s> is not an admin', self.email.data)
-            raise validators.ValidationError('Access denied')
+            raise validators.ValidationError('Invalid credentials')
 
         if not check_password(self.password.data, user.password):
             logger.info('LoginForm >>> user password is invalid')
