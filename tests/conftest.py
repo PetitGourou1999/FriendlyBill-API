@@ -1,3 +1,4 @@
+import datetime
 import pytest
 
 from flask_jwt_extended import create_access_token
@@ -5,7 +6,7 @@ from flask_jwt_extended import create_access_token
 from app import app, db
 from config import TestingConfig
 
-from data.models import User, Bill, BillUser, BillItem, MODELS
+from data.models import User, OTP, Bill, BillUser, BillItem, MODELS
 
 @pytest.fixture
 def application():
@@ -96,6 +97,13 @@ def other_user_basic(client, other_user_basic_email, other_user_basic_password):
     yield user
 
 @pytest.fixture
+def valid_user_admin_otp(client, user_admin):
+    otp = OTP.create_or_update_otp(user=user_admin)
+    otp.last_successful_attempt = datetime.datetime.now()
+    otp.save()
+    yield otp
+
+@pytest.fixture
 def bill(client, bill_title):
     bill = Bill.get_by_title(bill_title)
     if not bill:
@@ -135,7 +143,7 @@ def bill_item(client, bill_user_admin, bill_item_title, bill_item_amount):
     yield bill_item
 
 @pytest.fixture
-def all_data(client, user_admin, user_basic, other_user_basic, bill, bill_user_admin, bill_user_basic, bill_item):
+def all_data(client, user_admin, valid_user_admin_otp, user_basic, other_user_basic, bill, bill_user_admin, bill_user_basic, bill_item):
     pass
     
 @pytest.fixture    

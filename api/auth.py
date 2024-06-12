@@ -1,10 +1,13 @@
+import datetime
+
 from flask import Blueprint
 from flask_apispec import use_kwargs, marshal_with, doc
 from flask_jwt_extended import create_access_token, jwt_required, verify_jwt_in_request, current_user
 
+from custom_exceptions import UserBlockedException
 from shortcuts import check_password
 
-from data.models import User
+from data.models import User, OTP
 from data.schemas import UserSchema, LoginSchema, UserTokenSchema, ErrorSchema
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -41,6 +44,14 @@ def login(**kwargs):
             error = {"message": "Invalid email or password"}
             return error, 400
         try:
+            otp = OTP.get_by_user(user)
+            if not otp.is_still_valid:
+                error = {"message": "Need to revalidate OTP"}
+                return error, 400
+        except UserBlockedException as e:
+            error = {"message": str(e)}
+            return error, 500
+        try:
             authenticated_user = {
                 "user": user,
                 "token": create_access_token(identity=user)
@@ -52,6 +63,26 @@ def login(**kwargs):
     except Exception as e:
         error = {"message": str(e)}
         return error, 400
+
+@auth_bp.route('/otp/send', methods=['POST'])
+@use_kwargs(LoginSchema, location='json')
+@marshal_with(UserTokenSchema, code=200)
+@marshal_with(ErrorSchema, code=400)
+@marshal_with(ErrorSchema, code=500)
+@doc(description='Send OTP for user', tags=['Auth'])
+def send_otp(**kwargs):
+    #TODO : send via email
+    pass
+
+@auth_bp.route('/otp/validate', methods=['POST'])
+@use_kwargs(LoginSchema, location='json')
+@marshal_with(UserTokenSchema, code=200)
+@marshal_with(ErrorSchema, code=400)
+@marshal_with(ErrorSchema, code=500)
+@doc(description='Validate OTP for user', tags=['Auth'])
+def validate_otp(**kwargs):
+    #TODO : validate
+    pass
 
 @jwt_required()
 @auth_bp.route('/account', methods=['DELETE'])

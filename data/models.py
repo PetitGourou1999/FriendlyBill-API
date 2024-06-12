@@ -2,7 +2,8 @@ import datetime
 
 from peewee import *
 
-from shortcuts import encrypt_password
+from custom_exceptions import UserBlockedException
+from shortcuts import encrypt_password, generate_otp
 
 class BaseModel(Model):
     created_date = DateTimeField(default=datetime.datetime.now)
@@ -51,6 +52,60 @@ class User(BaseModel):
         return self.email
 
 
+class OTP(BaseModel):
+    id = AutoField()
+    user = ForeignKeyField(User, backref='otp', on_delete='CASCADE', unique=True)
+    otp = IntegerField(null=True)
+    num_attempts = IntegerField(default=0)
+    last_successful_attempt = DateTimeField(null=True)
+    blocked_since = DateTimeField(null=True)
+    
+    @classmethod
+    def get_by_user(self, user):
+        return self.get_or_none(OTP.user == user)
+    
+    @classmethod
+    def create_or_update_otp(self, user):
+        otp = self.get_by_user(user)
+        if not otp:
+            otp = OTP(user=user, otp=generate_otp(), num_attempts=1)
+            otp.save()
+            return otp
+        
+        if otp.is_blocked:
+            raise UserBlockedException()
+        else:
+            otp.blocked_since = None
+        
+        otp.otp = generate_otp()
+        otp.num_attempts = otp.num_attempts + 1
+        otp.save()
+        return otp
+    
+    @property
+    def is_blocked(self):
+        blocked_since = self.blocked_since
+        if blocked_since:
+            if type(blocked_since) is str:
+                blocked_since = datetime.datetime.fromisoformat(blocked_since)
+            if (blocked_since + datetime.timedelta(hours=1)) > datetime.datetime.now():
+                return True
+        return False
+
+    @property
+    def is_still_valid(self):
+        user_last_successful_attempt = self.last_successful_attempt
+        if type(user_last_successful_attempt) is str:
+            user_last_successful_attempt = datetime.datetime.fromisoformat(user_last_successful_attempt)
+        if (user_last_successful_attempt + datetime.timedelta(hours=72)) < datetime.datetime.now():
+            return False
+        return True
+
+        
+    def __str__(self) -> str:
+        return '{} - {}'.format(self.user.email, self.otp)
+
+    
 class Bill(BaseModel):
     id = AutoField()
     title = CharField()
@@ -108,7 +163,7 @@ class BillItem(BaseModel):
         return self.title
     
 
-MODELS = [User, Bill, BillUser, BillItem]
+MODELS = [User, OTP, Bill, BillUser, BillItem]
 
 def register_database(db):
     db.database.bind(MODELS)
