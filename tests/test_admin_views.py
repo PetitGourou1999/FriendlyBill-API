@@ -9,6 +9,11 @@ def test_users_view(client, user_admin, user_admin_email, user_admin_password):
     response = client.get('/admin/user/', follow_redirects=True)
     assert response.status_code == 200
 
+def test_otps_view(client, user_admin, user_admin_email, user_admin_password):
+    login(client, user_admin_email, user_admin_password)
+    response = client.get('/admin/otp/', follow_redirects=True)
+    assert response.status_code == 200
+
 def test_bills_view(client, user_admin, user_admin_email, user_admin_password):
     login(client, user_admin_email, user_admin_password)
     response = client.get('/admin/bill/', follow_redirects=True)
