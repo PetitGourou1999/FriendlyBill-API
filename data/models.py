@@ -55,7 +55,7 @@ class User(BaseModel):
 class OTP(BaseModel):
     id = AutoField()
     user = ForeignKeyField(User, backref='otp', on_delete='CASCADE', unique=True)
-    otp = IntegerField(null=True)
+    otp = CharField(null=True)
     num_attempts = IntegerField(default=0)
     last_successful_attempt = DateTimeField(null=True)
     blocked_since = DateTimeField(null=True)
@@ -72,13 +72,16 @@ class OTP(BaseModel):
             otp.save()
             return otp
         
+        otp.num_attempts = otp.num_attempts + 1
+        if otp.num_attempts > 3:
+            otp.blocked_since = datetime.datetime.now()
+        
         if otp.is_blocked:
             raise UserBlockedException()
         else:
             otp.blocked_since = None
         
         otp.otp = generate_otp()
-        otp.num_attempts = otp.num_attempts + 1
         otp.save()
         return otp
     
@@ -100,10 +103,9 @@ class OTP(BaseModel):
         if (user_last_successful_attempt + datetime.timedelta(hours=72)) < datetime.datetime.now():
             return False
         return True
-
         
     def __str__(self) -> str:
-        return '{} - {}'.format(self.user.email, self.otp)
+        return '{} : {}'.format(self.user.email, self.otp)
 
     
 class Bill(BaseModel):

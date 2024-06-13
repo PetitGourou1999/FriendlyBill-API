@@ -9,7 +9,10 @@ def test_flask_admin_user_properties(client, user_admin):
     
 def test_user_str(client, user_admin):
     assert str(user_admin) == user_admin.email
-    
+
+def test_otp_str(client, valid_user_admin_otp):
+    assert str(valid_user_admin_otp) == '{} : {}'.format(valid_user_admin_otp.user.email, valid_user_admin_otp.otp)
+       
 def test_bill_str(client, bill):
     assert str(bill) == bill.title
     

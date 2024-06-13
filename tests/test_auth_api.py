@@ -48,7 +48,7 @@ def test_login_invalid_credentials(client):
     assert response.status_code == 400
     assert response.json['message'] == 'Invalid email or password'
     
-def test_login(client, user_admin, user_admin_email, user_admin_password):
+def test_login(client, user_admin, valid_user_admin_otp, user_admin_email, user_admin_password):
     response = client.post('/api/auth/login', json={
         'email': user_admin_email,
         'password': user_admin_password

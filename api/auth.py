@@ -8,7 +8,7 @@ from custom_exceptions import UserBlockedException
 from shortcuts import check_password
 
 from data.models import User, OTP
-from data.schemas import UserSchema, LoginSchema, UserTokenSchema, ErrorSchema
+from data.schemas import UserSchema, OTPSchema, LoginSchema, UserTokenSchema, ErrorSchema
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -38,51 +38,86 @@ def register(**kwargs):
 @marshal_with(ErrorSchema, code=500)
 @doc(description='Login user', tags=['Auth'])
 def login(**kwargs):
+    user = User.get_by_email(kwargs.get('email'))
+    if not user or not check_password(kwargs.get('password'), user.password):
+        error = {"message": "Invalid email or password"}
+        return error, 400
+    otp = OTP.get_by_user(user)
+    if otp.is_blocked:
+        error = {"message": "User is blocked"}
+        return error, 500
+    if not otp.is_still_valid:
+        error = {"message": "Need to revalidate OTP"}
+        return error, 400
     try:
-        user = User.get_by_email(kwargs.get('email'))
-        if not user or not check_password(kwargs.get('password'), user.password):
-            error = {"message": "Invalid email or password"}
-            return error, 400
-        try:
-            otp = OTP.get_by_user(user)
-            if not otp.is_still_valid:
-                error = {"message": "Need to revalidate OTP"}
-                return error, 400
-        except UserBlockedException as e:
-            error = {"message": str(e)}
-            return error, 500
-        try:
-            authenticated_user = {
-                "user": user,
-                "token": create_access_token(identity=user)
-            }
-            return authenticated_user, 200
-        except Exception as e:
-            error = {"message": str(e)}
-            return error, 500
+        authenticated_user = {
+            "user": user,
+            "token": create_access_token(identity=user)
+        }
+        return authenticated_user, 200
     except Exception as e:
         error = {"message": str(e)}
-        return error, 400
-
+        return error, 500
+    
 @auth_bp.route('/otp/send', methods=['POST'])
 @use_kwargs(LoginSchema, location='json')
-@marshal_with(UserTokenSchema, code=200)
+@marshal_with(OTPSchema, code=201)
 @marshal_with(ErrorSchema, code=400)
 @marshal_with(ErrorSchema, code=500)
 @doc(description='Send OTP for user', tags=['Auth'])
 def send_otp(**kwargs):
-    #TODO : send via email
-    pass
+    user = User.get_by_email(kwargs.get('email'))
+    if not user or not check_password(kwargs.get('password'), user.password):
+        error = {"message": "Invalid email or password"}
+        return error, 400
+    try:
+        otp = OTP.create_or_update_otp(user)
+        generated_otp = {
+            "otp": otp.otp,
+            "email": user.email,
+            "password": ""
+        }
+        return generated_otp, 201
+    except UserBlockedException as e:
+        error = {"message": str(e)}
+        return error, 500
 
 @auth_bp.route('/otp/validate', methods=['POST'])
-@use_kwargs(LoginSchema, location='json')
+@use_kwargs(OTPSchema, location='json')
 @marshal_with(UserTokenSchema, code=200)
 @marshal_with(ErrorSchema, code=400)
 @marshal_with(ErrorSchema, code=500)
 @doc(description='Validate OTP for user', tags=['Auth'])
 def validate_otp(**kwargs):
-    #TODO : validate
-    pass
+    user = User.get_by_email(kwargs.get('email'))
+    if not user or not check_password(kwargs.get('password'), user.password):
+        error = {"message": "Invalid email or password"}
+        return error, 400
+    otp = OTP.get_by_user(user)
+    if not otp:
+        error = {"message": "OTP not found"}
+        return error, 500
+    if otp.is_blocked:
+        error = {"message": "User is blocked"}
+        return error, 500
+    if not otp.otp == kwargs.get('otp'):
+        error = {"message": "OTP challenge failed"}
+        return error, 400
+    
+    otp.last_successful_attempt = datetime.datetime.now()
+    otp.blocked_since = None
+    otp.num_attempts = 0
+    otp.save()
+    
+    try:
+        authenticated_user = {
+            "user": user,
+            "token": create_access_token(identity=user)
+        }
+        return authenticated_user, 200
+    except Exception as e:
+        error = {"message": str(e)}
+        return error, 500
 
 @jwt_required()
 @auth_bp.route('/account', methods=['DELETE'])

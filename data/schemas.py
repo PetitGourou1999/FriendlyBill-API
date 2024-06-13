@@ -31,6 +31,10 @@ class UserTokenSchema(Schema):
     token = fields.Str()
 
 
+class OTPSchema(LoginSchema):
+    otp = fields.Str(required=True)
+
+
 class BillSchema(BaseSchema):
     id = fields.Int(dump_only=True)
     title = fields.Str(required=True)
