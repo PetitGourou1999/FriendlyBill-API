@@ -104,6 +104,28 @@ def valid_user_admin_otp(client, user_admin):
     yield otp
 
 @pytest.fixture
+def three_attempts_user_admin_otp(client, user_admin):
+    otp = OTP.create_or_update_otp(user=user_admin)
+    otp.num_attempts = 3
+    otp.save()
+    yield otp
+
+@pytest.fixture
+def blocked_user_admin_otp(client, user_admin):
+    otp = OTP.create_or_update_otp(user=user_admin)
+    otp.num_attempts = 4
+    otp.blocked_since = datetime.datetime.now()
+    otp.save()
+    yield otp
+
+@pytest.fixture
+def invalid_user_admin_otp(client, user_admin):
+    otp = OTP.create_or_update_otp(user=user_admin)
+    otp.last_successful_attempt = datetime.datetime.now() - datetime.timedelta(hours=144)
+    otp.save()
+    yield otp
+
+@pytest.fixture
 def bill(client, bill_title):
     bill = Bill.get_by_title(bill_title)
     if not bill:

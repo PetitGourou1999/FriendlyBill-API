@@ -75,6 +75,8 @@ class OTP(BaseModel):
         otp.num_attempts = otp.num_attempts + 1
         if otp.num_attempts > 3:
             otp.blocked_since = datetime.datetime.now()
+            otp.save()
+            raise UserBlockedException()
         
         if otp.is_blocked:
             raise UserBlockedException()

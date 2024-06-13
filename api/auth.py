@@ -48,7 +48,7 @@ def login(**kwargs):
         return error, 500
     if not otp.is_still_valid:
         error = {"message": "Need to revalidate OTP"}
-        return error, 400
+        return error, 500
     try:
         authenticated_user = {
             "user": user,
@@ -70,6 +70,11 @@ def send_otp(**kwargs):
     if not user or not check_password(kwargs.get('password'), user.password):
         error = {"message": "Invalid email or password"}
         return error, 400
+    otp = OTP.get_by_user(user)
+    if otp and otp.is_blocked:
+        error = {"message": "User is blocked"}
+        return error, 500
+    
     try:
         otp = OTP.create_or_update_otp(user)
         generated_otp = {
