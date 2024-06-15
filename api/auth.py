@@ -67,7 +67,10 @@ def login(**kwargs):
 @doc(description='Send OTP for user', tags=['Auth'])
 def send_otp(**kwargs):
     user = User.get_by_email(kwargs.get('email'))
-    if not user or not check_password(kwargs.get('password'), user.password):
+    if not user:
+        error = {"message": "Invalid email or password"}
+        return error, 400
+    if kwargs.get('password') and not (check_password(kwargs.get('password'), user.password)):
         error = {"message": "Invalid email or password"}
         return error, 400
     otp = OTP.get_by_user(user)
@@ -80,7 +83,6 @@ def send_otp(**kwargs):
         generated_otp = {
             "otp": otp.otp,
             "email": user.email,
-            "password": ""
         }
         return generated_otp, 201
     except UserBlockedException as e:
@@ -95,7 +97,10 @@ def send_otp(**kwargs):
 @doc(description='Validate OTP for user', tags=['Auth'])
 def validate_otp(**kwargs):
     user = User.get_by_email(kwargs.get('email'))
-    if not user or not check_password(kwargs.get('password'), user.password):
+    if not user:
+        error = {"message": "Invalid email or password"}
+        return error, 400
+    if kwargs.get('password') and not (check_password(kwargs.get('password'), user.password)):
         error = {"message": "Invalid email or password"}
         return error, 400
     otp = OTP.get_by_user(user)
@@ -114,15 +119,18 @@ def validate_otp(**kwargs):
     otp.num_attempts = 0
     otp.save()
     
-    try:
-        authenticated_user = {
-            "user": user,
-            "token": create_access_token(identity=user)
-        }
-        return authenticated_user, 200
-    except Exception as e:
-        error = {"message": str(e)}
-        return error, 500
+    if kwargs.get('password'):
+        try:
+            authenticated_user = {
+                "user": user,
+                "token": create_access_token(identity=user)
+            }
+            return authenticated_user, 200
+        except Exception as e:
+            error = {"message": str(e)}
+            return error, 500
+    else:
+        return {}, 204
 
 @jwt_required()
 @auth_bp.route('/password/update', methods=['POST'])

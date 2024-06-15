@@ -119,10 +119,27 @@ def test_send_otp_never_asked(client, user_admin, user_admin_email, user_admin_p
     
     assert OTP.get_by_user(user_admin) is not None
 
-def test_send_otp(client, user_admin, user_admin_email, user_admin_password, valid_user_admin_otp):
+def test_send_otp_with_invalid_password(client, user_admin, user_admin_email, valid_user_admin_otp):
+    response = client.post('/api/auth/otp/send', json={
+        'email': user_admin_email,
+        'password': 'NotAPassword'
+    })
+    assert response.status_code == 400
+    assert response.json['message'] == 'Invalid email or password'
+
+def test_send_otp_with_password(client, user_admin, user_admin_email, user_admin_password, valid_user_admin_otp):
     response = client.post('/api/auth/otp/send', json={
         'email': user_admin_email,
         'password': user_admin_password
+    })
+    assert response.status_code == 201
+    assert response.json['email'] == user_admin_email
+    
+    assert OTP.get_by_user(user_admin) is not None
+
+def test_send_otp_without_password(client, user_admin, user_admin_email, user_admin_password, valid_user_admin_otp):
+    response = client.post('/api/auth/otp/send', json={
+        'email': user_admin_email,
     })
     assert response.status_code == 201
     assert response.json['email'] == user_admin_email
@@ -178,7 +195,16 @@ def test_validate_otp_failed(client, user_admin, user_admin_email, user_admin_pa
     otp = OTP.get_by_user(user_admin)
     assert otp.last_successful_attempt is None
 
-def test_validate_otp(client, user_admin, user_admin_email, user_admin_password):
+def test_validate_otp_with_invalid_password(client, user_admin, user_admin_email):
+    response = client.post('/api/auth/otp/validate', json={
+        'email': user_admin_email,
+        'password': 'NotAPassword',
+        'otp': '123456'
+    })
+    assert response.status_code == 400
+    assert response.json['message'] == 'Invalid email or password'
+    
+def test_validate_otp_with_password(client, user_admin, user_admin_email, user_admin_password):
     response = client.post('/api/auth/otp/send', json={
         'email': user_admin_email,
         'password': user_admin_password
@@ -193,6 +219,24 @@ def test_validate_otp(client, user_admin, user_admin_email, user_admin_password)
     })
     assert response.status_code == 200
     assert response.json['token']
+    
+    otp = OTP.get_by_user(user_admin)
+    assert otp.last_successful_attempt is not None
+    assert otp.num_attempts == 0
+
+def test_validate_otp_without_password(client, user_admin, user_admin_email, user_admin_password):
+    response = client.post('/api/auth/otp/send', json={
+        'email': user_admin_email,
+        'password': user_admin_password
+    })
+    assert response.status_code == 201
+    
+    otp = OTP.get_by_user(user_admin)
+    response = client.post('/api/auth/otp/validate', json={
+        'email': user_admin_email,
+        'otp': otp.otp
+    })
+    assert response.status_code == 204
     
     otp = OTP.get_by_user(user_admin)
     assert otp.last_successful_attempt is not None
