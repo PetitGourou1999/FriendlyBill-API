@@ -5,10 +5,10 @@ from flask_apispec import use_kwargs, marshal_with, doc
 from flask_jwt_extended import create_access_token, jwt_required, verify_jwt_in_request, current_user
 
 from custom_exceptions import UserBlockedException
-from shortcuts import check_password
+from shortcuts import check_password, encrypt_password
 
 from data.models import User, OTP
-from data.schemas import UserSchema, OTPSchema, LoginSchema, UserTokenSchema, ErrorSchema
+from data.schemas import UserSchema, OTPSchema, LoginSchema, UserTokenSchema, UpdatePasswordSchema, ReinitPasswordSchema, ErrorSchema
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -123,6 +123,33 @@ def validate_otp(**kwargs):
     except Exception as e:
         error = {"message": str(e)}
         return error, 500
+
+@jwt_required()
+@auth_bp.route('/password/update', methods=['POST'])
+@use_kwargs(UpdatePasswordSchema, location='json')
+@marshal_with(ErrorSchema, code=400)
+@marshal_with(ErrorSchema, code=500)
+def update_password(**kwargs):
+    if verify_jwt_in_request():
+        if not check_password(kwargs.get('old_password'), current_user.password):
+            error = {"message": "Current password is incorrect"}
+            return error, 400
+        current_user.password = encrypt_password(kwargs.get('new_password'))
+        current_user.save()
+        return {}, 204
+
+@auth_bp.route('/password/lost', methods=['POST'])
+@use_kwargs(ReinitPasswordSchema, location='json')
+@marshal_with(ErrorSchema, code=400)
+@marshal_with(ErrorSchema, code=500)
+def lost_password(**kwargs):
+    user = User.get_by_email(kwargs.get('email'))
+    if not user:
+        error = {"message": "Invalid email"}
+        return error, 400
+    user.password : encrypt_password(kwargs.get('new_password'))
+    user.save()
+    return {}, 204
 
 @jwt_required()
 @auth_bp.route('/account', methods=['DELETE'])

@@ -35,6 +35,16 @@ class OTPSchema(LoginSchema):
     otp = fields.Str(required=True)
 
 
+class UpdatePasswordSchema(Schema):
+    old_password = fields.Str(required=True)
+    new_password = fields.Str(required=True)
+
+
+class ReinitPasswordSchema(Schema):
+    email = fields.Str(required=True)
+    new_password = fields.Str(required=True)
+
+
 class BillSchema(BaseSchema):
     id = fields.Int(dump_only=True)
     title = fields.Str(required=True)
