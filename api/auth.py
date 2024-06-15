@@ -132,7 +132,7 @@ def validate_otp(**kwargs):
 def update_password(**kwargs):
     if verify_jwt_in_request():
         if not check_password(kwargs.get('old_password'), current_user.password):
-            error = {"message": "Current password is incorrect"}
+            error = {"message": "Current password is invalid"}
             return error, 400
         current_user.password = encrypt_password(kwargs.get('new_password'))
         current_user.save()
@@ -147,7 +147,7 @@ def lost_password(**kwargs):
     if not user:
         error = {"message": "Invalid email"}
         return error, 400
-    user.password : encrypt_password(kwargs.get('new_password'))
+    user.password = encrypt_password(kwargs.get('new_password'))
     user.save()
     return {}, 204
 
