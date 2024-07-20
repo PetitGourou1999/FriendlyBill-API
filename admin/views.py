@@ -1,3 +1,5 @@
+import uuid
+
 from flask_login import current_user
 from flask_admin.contrib.peewee import ModelView
 
@@ -21,6 +23,9 @@ class UsersView(ModelView):
         'email': fields.EmailField,
         'password': fields.PasswordField,
     }
+    
+    form_excluded_columns = ('uuid')
+    
     form_args = {
         'firstname': {
             'validators': [validators.InputRequired()]

@@ -5,8 +5,7 @@ from flask_jwt_extended import jwt_required, current_user
 from webargs import fields
 
 from data.models import User, Bill, BillUser, BillItem
-from data.schemas import BillUserSchema, BillItemSchema, ErrorSchema
-from data.schemas import CreateBillSchema, InviteUserSchema, CreateBillItemSchema
+from data.schemas import BillUserSchema, BillItemSchema, ErrorSchema, CreateBillSchema, InviteUserSchema, CreateBillItemSchema
 
 class BillResource(MethodResource):
 
@@ -36,7 +35,7 @@ class BillResource(MethodResource):
         return {}, 201
     
     @jwt_required()
-    @use_kwargs({"id": fields.Int()}, location="query")
+    @use_kwargs({"id": fields.Int()}, location='query')
     @marshal_with(ErrorSchema, code=400)
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Delete bill', tags=['Bills'])
@@ -117,7 +116,7 @@ class BillUserResource(MethodResource):
         return {}, 204
     
     @jwt_required()
-    @use_kwargs({"id": fields.Int()}, location="query")
+    @use_kwargs({"id": fields.Int()}, location='query')
     @marshal_with(ErrorSchema, code=400)
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Remove user from bill', tags=['Bill Users'])
@@ -174,7 +173,7 @@ class BillItemResource(MethodResource):
         return {}, 201
 
     @jwt_required()
-    @use_kwargs({"id": fields.Int()}, location="query")
+    @use_kwargs({"id": fields.Int()}, location='query')
     @marshal_with(ErrorSchema, code=400)
     @marshal_with(ErrorSchema, code=500)
     @doc(description='Delete bill item', tags=['Bill Items'])

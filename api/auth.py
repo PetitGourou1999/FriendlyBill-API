@@ -178,5 +178,10 @@ def register_auth_api(application, docs):
     application.register_blueprint(auth_bp)
     docs.register(register, blueprint = auth_bp.name)
     docs.register(login, blueprint = auth_bp.name)
+    docs.register(send_otp, blueprint = auth_bp.name)
+    docs.register(validate_otp, blueprint = auth_bp.name)
+    docs.register(update_password, blueprint = auth_bp.name)
+    docs.register(lost_password, blueprint = auth_bp.name)
     docs.register(delete_account, blueprint = auth_bp.name)
+    
 

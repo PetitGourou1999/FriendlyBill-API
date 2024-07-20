@@ -1,4 +1,5 @@
 import click
+import uuid
 
 from email_validator import validate_email, EmailNotValidError
 
@@ -21,7 +22,7 @@ def create_admin():
     surname = click.prompt('Lastname', type=click.STRING)
     password = click.prompt('Password', type=click.STRING, hide_input=True, confirmation_prompt=True)
     
-    user = User.create(firstname=firstname, surname=surname, email=email, password=password, is_superadmin=True)
+    user = User.create(uuid=uuid.uuid4(), firstname=firstname, surname=surname, email=email, password=password, is_superadmin=True)
 
     if user:
         click.echo('User added')

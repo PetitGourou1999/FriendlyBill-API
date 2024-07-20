@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from peewee import *
 
@@ -12,6 +13,7 @@ class BaseModel(Model):
 
 class User(BaseModel):
     id = AutoField()
+    uuid = CharField(unique=True, default=uuid.uuid4)
     firstname = CharField()
     surname = CharField()
     email = CharField(unique=True)
