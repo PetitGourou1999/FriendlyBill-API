@@ -5,6 +5,7 @@ from flask_admin.contrib.peewee import ModelView
 
 from logzero import logger
 
+from peewee import IntegrityError
 from wtforms import fields, validators
 from wtforms.utils import unset_value
 
@@ -45,19 +46,17 @@ class UsersView(ModelView):
     }
     
     def on_model_change(self, form, model, is_created):
-        logger.debug('on_model_change')
         if is_created:
-            logger.debug('is_created')
             model.password = encrypt_password(form.password.data)
         else:
-            logger.debug('!is_created')
             user = User.get_by_id(model.id)
-            logger.debug(user)
             if user.password != form.password.data:
-                logger.debug('encrypt_password')
                 model.password = encrypt_password(form.password.data)
-        return super().on_model_change(form, model, is_created)
-    
+        try:
+            return super().on_model_change(form, model, is_created)
+        except IntegrityError as e:
+            logger.error(e)
+
 
 class OTPsView(ModelView):
     def is_accessible(self):
